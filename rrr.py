@@ -54,6 +54,22 @@ def printHelp():
         print("Put your feeds (line by line, only the URL) into your feeds file")
         print("More features (maybe) to come.")
 
+def updateFeeds():
+        cachestring = ""
+        index = 0
+        for f in feeds:
+            d = feedparser.parse(f)
+            print(color.BOLD + d['feed']['title'] + color.END)
+            for e in d.entries:
+                published_time = time.mktime(e.published_parsed)
+                if int(timenow - published_time) < int(timelimit * 60 * 60):
+                    formatOutput(index, d['feed']['title'], e)
+                    cachestring = cachestring + e.link + "\n"
+                    index += 1
+
+        with open(cachepath, "w") as cachefile:
+                cachefile.write(cachestring)
+
 # main
 
 # check if arguments are present. if not, do the usual feed update thing
@@ -68,17 +84,5 @@ except:
         print("DEBUG No cache file found")
 
 
-cachestring = ""
-index = 0
-for f in feeds:
-    d = feedparser.parse(f)
-    print(color.BOLD + d['feed']['title'] + color.END)
-    for e in d.entries:
-        published_time = time.mktime(e.published_parsed)
-        if int(timenow - published_time) < int(timelimit * 60 * 60):
-            formatOutput(index, d['feed']['title'], e)
-            cachestring = cachestring + e.link + "\n"
-            index += 1
-
-with open(cachepath, "w") as cachefile:
-        cachefile.write(cachestring)
+updateFeeds()
+exit()
