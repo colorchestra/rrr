@@ -21,7 +21,11 @@ class color:
 timenow = time.time()
 timelimit = 24    # number of hours before posts expire
 cachepath = "cache.txt"
-feedspath = "feeds.txt.example"
+feedspath = "feeds.txt"
+
+if not os.path.isfile(feedspath):
+        feedspath = "feeds.txt.example"
+
 with open(feedspath, "r") as feedsfile:
         feeds = feedsfile.readlines()
 
@@ -83,6 +87,6 @@ try:
 except:
         print("DEBUG No cache file found")
 
-
 updateFeeds()
+
 exit()
