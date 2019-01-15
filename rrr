@@ -6,6 +6,11 @@ import time
 import sys
 import os
 
+timelimit = 24    # number of hours before posts expire
+cachepath = "cache.txt"
+feedspath = "feeds.txt"
+versionsOnly = False    # debug tool to show only names and rss/atom versions of feeds
+
 class color:
    PURPLE = '\033[95m'
    CYAN = '\033[96m'
@@ -18,14 +23,8 @@ class color:
    UNDERLINE = '\033[4m'
    END = '\033[0m'
 
-timenow = time.time()
-timelimit = 24    # number of hours before posts expire
-cachepath = "cache.txt"
-feedspath = "feeds.txt"
-versionsOnly = False    # debug tool to show only names and rss/atom versions of feeds
-
-if time.strftime("%w") == "1":
-        print("montag fick ja")
+if time.strftime("%w") == "1":  # "monday mode" - since by the logic of this tools you haven't checked your feeds in 72 hours on monday mornings
+#        print("DEBUG montag fick ja")
         timelimit = 72
 
 if not os.path.isfile(feedspath):
@@ -33,12 +32,6 @@ if not os.path.isfile(feedspath):
 
 with open(feedspath, "r") as feedsfile:
         feeds = feedsfile.readlines()
-
-#def formatOutput(index, mediumtitle, article):
-#    output = color.BOLD + str(index).ljust(5) + color.END + article.published + "\n     " + mediumtitle + "\n     " + article.title + "\n     " 
-#    if not article.description.startswith("<"):         # don't print html descriptions
-#            output = output + article.description + "\n"
-#    print(output)
 
 def formatOutput(article):
     output = color.BOLD + str(article['index']).ljust(5) + color.END + article['published'] + "\n     " + article['medium'] + "\n     " + article['title'] + "\n     " 
@@ -70,19 +63,6 @@ def printHelp():
         print("Put your feeds (line by line, only the URL) into your feeds file")
         print("More features (maybe) to come.")
 
-def updateRss20(d):
-        print("DEBUG This is an rss20 feed!")
-        global index, cachestring
-        
-        for e in d.entries:
-            published_time = time.mktime(e.published_parsed)
-            if int(time.time() - published_time) < int(timelimit * 60 * 60):
-                article = {'index': index, 'published': e.published, 'title': e.title, 'description': e.description, 'medium': d['feed']['title']}
-                formatOutput(article)
-                cachestring = cachestring + e.link + "\n"
-                index += 1
-#                return cachestring
-
 def updateRss10(d):
         print("DEBUG This is an rss10 feed!")
         global index, cachestring
@@ -94,7 +74,18 @@ def updateRss10(d):
                 formatOutput(article)
                 cachestring = cachestring + e.link + "\n"
                 index += 1
-#                return cachestring
+
+def updateRss20(d):
+        print("DEBUG This is an rss20 feed!")
+        global index, cachestring
+        
+        for e in d.entries:
+            published_time = time.mktime(e.published_parsed)
+            if int(time.time() - published_time) < int(timelimit * 60 * 60):
+                article = {'index': index, 'published': e.published, 'title': e.title, 'description': e.description, 'medium': d['feed']['title']}
+                formatOutput(article)
+                cachestring = cachestring + e.link + "\n"
+                index += 1
 
 def updateAtom10(d):
         print("DEBUG This is an atom10 feed!")
@@ -107,7 +98,6 @@ def updateAtom10(d):
                 formatOutput(article)
                 cachestring = cachestring + e.link + "\n"
                 index += 1
-#                return cachestring
 
 def updateFeeds():
         global index, cachestring
