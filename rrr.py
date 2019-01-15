@@ -34,10 +34,16 @@ if not os.path.isfile(feedspath):
 with open(feedspath, "r") as feedsfile:
         feeds = feedsfile.readlines()
 
-def formatOutput(index, mediumtitle, article):
-    output = color.BOLD + str(index).ljust(5) + color.END + article.published + "\n     " + mediumtitle + "\n     " + article.title + "\n     " 
-    if not article.description.startswith("<"):         # don't print html descriptions
-            output = output + article.description + "\n"
+#def formatOutput(index, mediumtitle, article):
+#    output = color.BOLD + str(index).ljust(5) + color.END + article.published + "\n     " + mediumtitle + "\n     " + article.title + "\n     " 
+#    if not article.description.startswith("<"):         # don't print html descriptions
+#            output = output + article.description + "\n"
+#    print(output)
+
+def formatOutput(article):
+    output = color.BOLD + str(article['index']).ljust(5) + color.END + article['published'] + "\n     " + article['medium'] + "\n     " + article['title'] + "\n     " 
+    if not article['description'].startswith("<"):         # don't print html descriptions
+            output = output + article['description'] + "\n"
     print(output)
 
 def handleArguments():
@@ -64,19 +70,69 @@ def printHelp():
         print("Put your feeds (line by line, only the URL) into your feeds file")
         print("More features (maybe) to come.")
 
+def updateRss20(d):
+        print("DEBUG This is an rss20 feed!")
+        global index, cachestring
+        
+        for e in d.entries:
+            published_time = time.mktime(e.published_parsed)
+            if int(time.time() - published_time) < int(timelimit * 60 * 60):
+                article = {'index': index, 'published': e.published, 'title': e.title, 'description': e.description, 'medium': d['feed']['title']}
+                formatOutput(article)
+                cachestring = cachestring + e.link + "\n"
+                index += 1
+#                return cachestring
+
+def updateRss10(d):
+        print("DEBUG This is an rss10 feed!")
+        global index, cachestring
+
+        for e in d.entries:
+            published_time = time.mktime(e.updated_parsed)
+            if int(time.time() - published_time) < int(timelimit * 60 * 60):
+                article = {'index': index, 'published': e.updated, 'title': e.title, 'description': e.description, 'medium': d['feed']['title']}
+                formatOutput(article)
+                cachestring = cachestring + e.link + "\n"
+                index += 1
+#                return cachestring
+
+def updateAtom10(d):
+        print("DEBUG This is an atom10 feed!")
+        global index, cachestring
+
+        for e in d.entries:
+            published_time = time.mktime(e.updated_parsed)
+            if int(time.time() - published_time) < int(timelimit * 60 * 60):
+                article = {'index': index, 'published': e.updated, 'title': e.title, 'description': e.description, 'medium': d['feed']['title']}
+                formatOutput(article)
+                cachestring = cachestring + e.link + "\n"
+                index += 1
+#                return cachestring
+
 def updateFeeds():
-        cachestring = ""
-        index = 0
+        global index, cachestring
+
+        try:
+                os.remove(cachepath)
+                print("DEBUG Cache file deleted")
+        except:
+                print("DEBUG No cache file found")
+
         for f in feeds:
             d = feedparser.parse(f)
             if not versionsOnly:        # see versionsOnly above. if condition can be removed once all rss and atom versions work
                 print(color.BOLD + d['feed']['title'] + color.END)
-                for e in d.entries:
-                    published_time = time.mktime(e.published_parsed)
-                    if int(time.time() - published_time) < int(timelimit * 60 * 60):
-                        formatOutput(index, d['feed']['title'], e)
-                        cachestring = cachestring + e.link + "\n"
-                        index += 1
+                
+                if d.version == "rss20":
+                        updateRss20(d)
+                elif d.version == "rss10":
+                        updateRss10(d) 
+                elif d.version == "atom10":
+                        updateAtom10(d) 
+                else:
+                        print("This feed is in '" + d.version + "' format. This is not supported yet.\n")
+                
+
             else:
                 print(color.BOLD + d['feed']['title'] + color.END + d.version)
 
@@ -85,17 +141,15 @@ def updateFeeds():
 
 # main
 
+# cache file should be deleted upon each update
+
+index = 0
+cachestring = ""
+
 # check if arguments are present. if not, do the usual feed update thing
 if len(sys.argv) > 1:
         handleArguments()
-
-# cache file should be deleted upon each update
-try:
-        os.remove(cachepath)
-#        print("DEBUG Cache file deleted")
-except:
-        print("DEBUG No cache file found")
-
-updateFeeds()
-
-exit()
+        exit()
+else:
+        updateFeeds()
+        exit()

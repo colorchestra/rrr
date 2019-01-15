@@ -1,7 +1,7 @@
 # rrr
 ## the stupidest feed reader
 
-watch out: currently only supports rss 2.0. if you're not sure which versions your feeds are, set `versionsOnly` to `True`.
+watch out: currently only supports rss 1.0, 2.0 and atom 1.0. if you're not sure which versions your feeds are, set `versionsOnly` to `True`.
 
 ### usage
 - put your feeds in the feeds file
