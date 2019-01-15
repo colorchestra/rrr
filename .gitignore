@@ -1,3 +1,5 @@
 feeds.txt
 cache.txt
 *.swp
+*.bak
+.vscode

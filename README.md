@@ -1,6 +1,8 @@
 # rrr
 ## the stupidest feed reader
 
+watch out: currently only supports rss 2.0. if you're not sure which versions your feeds are, set `versionsOnly` to `True`.
+
 ### usage
 - put your feeds in the feeds file
 - run rrr without arguments to build the cache
@@ -8,6 +10,7 @@
 
 ### to do
 - stable support for various kinds of rss and atom
+- ~~monday mode: display last 72 hours on mondays (insted of default 24 hours on other weekdays)~~
 - maybe: color (if not: throw out defined colors)
 - maybe: opml import (oof)
 - maybe: if there's a cool way: dump articles into the terminal
