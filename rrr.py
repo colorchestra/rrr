@@ -22,6 +22,11 @@ timenow = time.time()
 timelimit = 24    # number of hours before posts expire
 cachepath = "cache.txt"
 feedspath = "feeds.txt"
+versionsOnly = False    # debug tool to show only names and rss/atom versions of feeds
+
+if time.strftime("%w") == "1":
+        print("montag fick ja")
+        timelimit = 72
 
 if not os.path.isfile(feedspath):
         feedspath = "feeds.txt.example"
@@ -40,6 +45,7 @@ def handleArguments():
                 if sys.argv[1] == "-h" or sys.argv[1] == "--help":
                         printHelp()
                         exit()
+
 
         with open(cachepath, "r") as cachefile:
             lines = cachefile.readlines()
@@ -63,13 +69,16 @@ def updateFeeds():
         index = 0
         for f in feeds:
             d = feedparser.parse(f)
-            print(color.BOLD + d['feed']['title'] + color.END)
-            for e in d.entries:
-                published_time = time.mktime(e.published_parsed)
-                if int(timenow - published_time) < int(timelimit * 60 * 60):
-                    formatOutput(index, d['feed']['title'], e)
-                    cachestring = cachestring + e.link + "\n"
-                    index += 1
+            if not versionsOnly:        # see versionsOnly above. if condition can be removed once all rss and atom versions work
+                print(color.BOLD + d['feed']['title'] + color.END)
+                for e in d.entries:
+                    published_time = time.mktime(e.published_parsed)
+                    if int(time.time() - published_time) < int(timelimit * 60 * 60):
+                        formatOutput(index, d['feed']['title'], e)
+                        cachestring = cachestring + e.link + "\n"
+                        index += 1
+            else:
+                print(color.BOLD + d['feed']['title'] + color.END + d.version)
 
         with open(cachepath, "w") as cachefile:
                 cachefile.write(cachestring)
