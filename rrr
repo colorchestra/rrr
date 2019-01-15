@@ -28,6 +28,7 @@ if time.strftime("%w") == "1":  # "monday mode" - since by the logic of this too
         timelimit = 72
 
 if not os.path.isfile(feedspath):
+        print("The specified feeds file could not be found. Falling back to the example file...")
         feedspath = "feeds.txt.example"
 
 with open(feedspath, "r") as feedsfile:
