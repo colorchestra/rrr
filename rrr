@@ -6,6 +6,8 @@ import time
 import sys
 import os
 
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 timelimit = 24    # number of hours before posts expire
 cachepath = "cache.txt"
 feedspath = "feeds.txt"
