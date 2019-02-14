@@ -5,6 +5,7 @@ import feedparser
 import time
 import sys
 import os
+import logging
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -12,6 +13,8 @@ timelimit = 24    # number of hours before posts expire
 cachepath = "cache.txt"
 feedspath = "feeds.txt"
 versionsOnly = False    # debug tool to show only names and rss/atom versions of feeds
+
+# logging.basicConfig(level=logging.DEBUG)
 
 class color:
    PURPLE = '\033[95m'
@@ -26,11 +29,11 @@ class color:
    END = '\033[0m'
 
 if time.strftime("%w") == "1":  # "monday mode" - since by the logic of this tools you haven't checked your feeds in 72 hours on monday mornings
-#        print("DEBUG montag fick ja")
+        logging.debug("montag fick ja")
         timelimit = 72
 
 if not os.path.isfile(feedspath):
-        print("The specified feeds file could not be found. Falling back to the example file...")
+        logging.warning("The specified feeds file could not be found. Falling back to the example file...")
         feedspath = "feeds.txt.example"
 
 with open(feedspath, "r") as feedsfile:
@@ -53,7 +56,7 @@ def handleArguments():
             lines = cachefile.readlines()
             for arg in range(1, len(sys.argv)):
                 if not sys.argv[arg].isdigit():
-                    print(sys.argv[arg] + " is not a number!")
+                    logging.warning(sys.argv[arg] + " is not a number!")
                 else:
                     print("Opening article " + sys.argv[arg] + "...")
                     os.system("xdg-open " + lines[int(sys.argv[arg])])
@@ -67,7 +70,7 @@ def printHelp():
         print("More features (maybe) to come.")
 
 def updateRss10(d):
-        print("DEBUG This is an rss10 feed!")
+        logging.debug("This is an rss10 feed!")
         global index, cachestring
 
         for e in d.entries:
@@ -79,7 +82,7 @@ def updateRss10(d):
                 index += 1
 
 def updateRss20(d):
-        print("DEBUG This is an rss20 feed!")
+        logging.debug("This is an rss20 feed!")
         global index, cachestring
         
         for e in d.entries:
@@ -91,7 +94,7 @@ def updateRss20(d):
                 index += 1
 
 def updateAtom10(d):
-        print("DEBUG This is an atom10 feed!")
+        logging.debug("This is an atom10 feed!")
         global index, cachestring
 
         for e in d.entries:
@@ -107,9 +110,9 @@ def updateFeeds():
 
         try:
                 os.remove(cachepath)
-                print("DEBUG Cache file deleted")
+                logging.debug("Cache file deleted")
         except:
-                print("DEBUG No cache file found")
+                logging.debug("No cache file found")
 
         for f in feeds:
             d = feedparser.parse(f)
@@ -123,7 +126,7 @@ def updateFeeds():
                 elif d.version == "atom10":
                         updateAtom10(d) 
                 else:
-                        print("This feed is in '" + d.version + "' format. This is not supported yet.\n")
+                        logging.warning("This feed is in '" + d.version + "' format. This is not supported yet.\n")
                 
 
             else:

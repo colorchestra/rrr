@@ -10,6 +10,7 @@ watch out: currently only supports rss 1.0, 2.0 and atom 1.0. if you're not sure
 
 ### to do
 - stable support for various kinds of rss and atom
+- error handling: when `d['feed']['title']` is empty 
 - ~~monday mode: display last 72 hours on mondays (insted of default 24 hours on other weekdays)~~
 - maybe: color (if not: throw out defined colors)
 - maybe: opml import (oof)
