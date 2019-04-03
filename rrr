@@ -38,9 +38,13 @@ if not os.path.isfile(feedspath):
 
 with open(feedspath, "r") as feedsfile:
         feeds = feedsfile.readlines()
+        for line in feeds:              # remove comments from feeds.txt
+            if line.startswith('#'):
+                feeds.remove(line)
 
 def formatOutput(article):
     output = color.BOLD + str(article['index']).ljust(5) + color.END + article['published'] + "\n     " + article['medium'] + "\n     " + article['title'] + "\n     " 
+    article['description'] = article['description'].replace("\n", " ")  # replace newlines with spaces so descriptions don't look weird
     if not article['description'].startswith("<"):         # don't print html descriptions
             output = output + article['description'] + "\n"
     print(output)
@@ -100,7 +104,10 @@ def updateAtom10(d):
         for e in d.entries:
             published_time = time.mktime(e.updated_parsed)
             if int(time.time() - published_time) < int(timelimit * 60 * 60):
-                article = {'index': index, 'published': e.updated, 'title': e.title, 'description': e.description, 'medium': d['feed']['title']}
+                if hasattr(e, 'description'):
+                    article = {'index': index, 'published': e.updated, 'title': e.title, 'description': e.description, 'medium': d['feed']['title']}
+                else:
+                    article = {'index': index, 'published': e.updated, 'title': e.title, 'description': "apparently no description was provided, what the shit", 'medium': d['feed']['title']}     # hack hack hack
                 formatOutput(article)
                 cachestring = cachestring + e.link + "\n"
                 index += 1
