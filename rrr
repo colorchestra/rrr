@@ -12,7 +12,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 timelimit = 24    # number of hours before posts expire
 cachepath = "cache.txt"
 feedspath = "feeds.txt"
-versionsOnly = False    # debug tool to show only names and rss/atom versions of feeds
+versionsOnly = False # debug tool to show only names and rss/atom versions of feeds
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -124,7 +124,11 @@ def updateFeeds():
         for f in feeds:
             d = feedparser.parse(f)
             if not versionsOnly:        # see versionsOnly above. if condition can be removed once all rss and atom versions work
-                print(color.BOLD + d['feed']['title'] + color.END)
+                try:
+                    print(color.BOLD + d['feed']['title'] + color.END)  # a bit hacky but feeds without title need to be handled
+                except KeyError:
+                    print(color.BOLD + f + color.END)
+
                 
                 if d.version == "rss20":
                         updateRss20(d)
@@ -132,6 +136,8 @@ def updateFeeds():
                         updateRss10(d) 
                 elif d.version == "atom10":
                         updateAtom10(d) 
+                elif d.version == "rss092":
+                        updateRss10(d) 
                 else:
                         logging.warning("This feed is in '" + d.version + "' format. This is not supported yet.\n")
                 
